@@ -9,6 +9,11 @@ import (
 
 func PublicRoutes(app *fiber.App, db *sqlx.DB) {
 	GroupAPI := app.Group("/api")
+	PublicHotelManageRoutes(db, GroupAPI)
+	PublicDeviceManageRoutes(db, GroupAPI)
+	// PublicChannelPackManageRoutes(db, GroupAPI)
+	// PublicChannelListManageRoutes(db, GroupAPI)
+	// PublicChannelManageRoutes(db, GroupAPI)
 
 	GroupAPI.Post("/post", controllers.PostControl(db))
 

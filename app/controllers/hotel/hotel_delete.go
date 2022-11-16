@@ -6,14 +6,26 @@ import (
 	"hotel_cms/pkg/utils"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 )
 
-func DeleteHotelData(db *sqlx.DB, deleteID int) fiber.Handler {
-	tableName := fmt.Sprintf("%s", os.Getenv("HOTEL"))
+func DeleteHotelData(db *sqlx.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		var deleteID int
+
+		deleteID, errConvert := strconv.Atoi(c.FormValue("deleteID"))
+		if errConvert != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(utils.Response{
+				Success:    false,
+				Message:    "Error when convert string to int ",
+				StatusCode: fiber.StatusBadRequest,
+			})
+		}
+
+		tableName := fmt.Sprintf("%s", os.Getenv("HOTEL"))
 		queryDb := "DELETE FROM " + tableName + " WHERE HotelID=?"
 		querySelect := "SELECT * FROM " + tableName + " WHERE HotelID=?"
 

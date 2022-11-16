@@ -1,4 +1,4 @@
-package hotel
+package device
 
 import (
 	"fmt"
@@ -13,9 +13,9 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func SearchHotelData(db *sqlx.DB) fiber.Handler {
+func SearchDeviceData(db *sqlx.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		p := queries.GetModelHotel(c)
+		p := queries.GetModelDevice(c)
 
 		if p == nil {
 			return c.Status(fiber.StatusBadRequest).JSON(utils.Response{
@@ -26,26 +26,37 @@ func SearchHotelData(db *sqlx.DB) fiber.Handler {
 		}
 
 		DataStruct := *p
-		HotelName := DataStruct.HotelName
+		HotelID := DataStruct.HotelID
+		DeviceName := DataStruct.DeviceName
 		IsActive := DataStruct.IsActive
 
-		tableName := fmt.Sprintf("%s", os.Getenv("HOTEL"))
+		tableName := fmt.Sprintf("%s", os.Getenv("DEVICE"))
 		queryDb := "SELECT * FROM " + tableName
 		WHERECLause := " WHERE 1=1"
-
-		if HotelName != nil {
-			WHERECLause += " AND HotelName LIKE '%" + *HotelName + "%'"
-		}
 		if IsActive != nil {
 			WHERECLause += " AND IsActive=" + strconv.FormatBool(*IsActive)
 		}
+		if DeviceName != nil {
+			WHERECLause += " AND DeviceName LIKE '%" + *DeviceName + "%'"
+		}
 
+		var result []models.DeviceManage
+
+		if HotelID == nil {
+			log.Println("Don't have hotel that want to SEARCH device manage data")
+			return c.Status(fiber.StatusOK).JSON(utils.Response{
+				Success:    true,
+				StatusCode: fiber.StatusOK,
+				Data:       result,
+			})
+		}
+		WHERECLause += " AND HotelID=?"
 		queryDb += WHERECLause
-		var result []models.HotelManage
-		err := db.Select(&result, queryDb)
+
+		err := db.Select(&result, queryDb, *HotelID)
 
 		if err != nil {
-			log.Println("Error to SEARCH hotel manage data", err)
+			log.Println("Error to SEARCH device manage data", err)
 			return c.Status(fiber.StatusBadRequest).JSON(utils.Response{
 				Success:    false,
 				StatusCode: fiber.StatusBadRequest,

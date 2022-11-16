@@ -2,7 +2,7 @@ package hotel
 
 import (
 	"fmt"
-	"hotel_cms/app/models"
+	"hotel_cms/app/queries"
 	"hotel_cms/pkg/utils"
 	"log"
 	"os"
@@ -11,10 +11,23 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func InsertHotelData(db *sqlx.DB, DataStruct models.HotelManage) fiber.Handler {
-	tableName := fmt.Sprintf("%s", os.Getenv("HOTEL"))
-	queryColumns, queryValues := utils.GetColumnsAndValuesHotelManage(DataStruct)
+func InsertHotelData(db *sqlx.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		p := queries.GetModelHotel(c)
+
+		if p == nil {
+			return c.Status(fiber.StatusBadRequest).JSON(utils.Response{
+				Success:    false,
+				Message:    "No data",
+				StatusCode: fiber.StatusBadRequest,
+			})
+		}
+
+		DataStruct := *p
+
+		tableName := fmt.Sprintf("%s", os.Getenv("HOTEL"))
+		queryColumns, queryValues := utils.GetColumnsAndValuesHotelManage(DataStruct)
+
 		queryDb := "INSERT INTO " + tableName + "(" + queryColumns + ") VALUES (" + queryValues + ")"
 		_, errInsert := db.Exec(queryDb)
 
