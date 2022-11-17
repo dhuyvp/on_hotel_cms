@@ -12,6 +12,19 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+func ChangeTableAfterDeleteHotel(db *sqlx.DB, HotelID int) {
+	tableName := fmt.Sprintf("%s", os.Getenv("DEVICE"))
+	queryDb := "DELETE FROM " + tableName + " WHERE HotelID=?"
+	_, errDelete := db.Exec(queryDb, HotelID)
+	fmt.Println(errDelete)
+
+	tableName = fmt.Sprintf("%s", os.Getenv("CHANNEL_PACK"))
+	queryDb = "DELETE FROM " + tableName + " WHERE HotelID=?"
+	_, errDelete = db.Exec(queryDb, HotelID)
+	fmt.Println(errDelete)
+
+}
+
 func DeleteHotelData(db *sqlx.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var deleteID int
@@ -39,6 +52,8 @@ func DeleteHotelData(db *sqlx.DB) fiber.Handler {
 				StatusCode: fiber.StatusBadRequest,
 			})
 		}
+
+		ChangeTableAfterDeleteHotel(db, deleteID)
 
 		_, errDelete := db.Exec(queryDb, deleteID)
 

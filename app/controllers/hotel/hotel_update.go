@@ -26,11 +26,18 @@ func UpdateHotelData(db *sqlx.DB) fiber.Handler {
 		DataStruct := *p
 		UpdateID := DataStruct.HotelID
 
+		if UpdateID == nil {
+			return c.Status(fiber.StatusBadRequest).JSON(utils.Response{
+				Success:    false,
+				StatusCode: fiber.StatusBadRequest,
+			})
+		}
+
 		tableName := fmt.Sprintf("%s", os.Getenv("HOTEL"))
 		queryUpdate := utils.GetQueryUpdateHotelManage(DataStruct)
 
 		queryDb := "UPDATE " + tableName + " SET " + queryUpdate + " WHERE HotelID=?"
-		_, errUpdate := db.Exec(queryDb, UpdateID)
+		_, errUpdate := db.Exec(queryDb, *UpdateID)
 
 		if errUpdate != nil {
 			log.Println("Error to UPDATE hotel manage data", errUpdate)

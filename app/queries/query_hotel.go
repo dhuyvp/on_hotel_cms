@@ -9,14 +9,14 @@ import (
 )
 
 func GetModelHotel(c *fiber.Ctx) *models.HotelManage {
-	var p *models.HotelManage
+	p := new(models.HotelManage)
 
 	if err := c.BodyParser(p); err != nil {
 		fmt.Println(err)
 		return nil
 	}
 
-	*p = middleware.CheckHotelInformation(*p)
+	p = middleware.CheckHotelInformation(p)
 
 	return p
 }

@@ -15,20 +15,15 @@ import (
 
 func SearchHotelData(db *sqlx.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		var HotelName *string
+		var IsActive *bool
 		p := queries.GetModelHotel(c)
 
-		if p == nil {
-			return c.Status(fiber.StatusBadRequest).JSON(utils.Response{
-				Success:    false,
-				Message:    "No data",
-				StatusCode: fiber.StatusBadRequest,
-			})
+		if p != nil {
+			DataStruct := *p
+			HotelName = DataStruct.HotelName
+			IsActive = DataStruct.IsActive
 		}
-
-		DataStruct := *p
-		HotelName := DataStruct.HotelName
-		IsActive := DataStruct.IsActive
-
 		tableName := fmt.Sprintf("%s", os.Getenv("HOTEL"))
 		queryDb := "SELECT * FROM " + tableName
 		WHERECLause := " WHERE 1=1"
